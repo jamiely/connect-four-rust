@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-type Index = (usize, usize);
+pub type Index = (usize, usize);
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-enum Marker {
+pub enum Marker {
     Empty,
     X,
     O,
@@ -12,28 +12,31 @@ enum Marker {
 pub struct Board {
     rows: usize,
     columns: usize,
-    indicies: Vec<Index>,
     markers: HashMap<Index, Marker>
 }
 
 impl Board {
+    pub fn indicies_from_rows_and_columns(rows: usize, columns: usize) -> Vec<Index> {
+        (0..columns).flat_map(|column: usize| {
+            (0..rows).map(move |row: usize| (column, row))
+        }).collect::<Vec<Index>>()
+    }
+    pub fn indicies(&self) -> Vec<Index> {
+        Board::indicies_from_rows_and_columns(self.rows, self.columns)
+    }
+
     pub fn new() -> Board {
         let rows = 6;
         let columns = 7;
 
-        let indicies = (0..columns).flat_map(|column: usize| {
-            (0..rows).map(move |row: usize| (column, row))
-        }).collect::<Vec<Index>>();
-
         let mut markers = HashMap::new();
-        for index in indicies.clone() {
+        for index in Board::indicies_from_rows_and_columns(rows, columns).clone() {
             markers.insert(index, Marker::Empty);
         }
 
         Board {
             rows: rows,
             columns: columns,
-            indicies: indicies,
             markers: markers
         }
     }
@@ -49,12 +52,15 @@ impl Board {
     pub fn get_marker(&self, index: &Index) -> Option<Marker> {
         self.markers.get(&index).map(|r| r.clone())
     }
+
+    pub fn has_moves(&self) -> bool {
+        self.markers.values().any(|v| Marker::Empty.eq(v))
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use super::Marker;
 
     #[test]
     fn should_have_7_columns_and_6_rows() {
@@ -66,7 +72,7 @@ mod test {
     #[test]
     fn it_should_have_rows_times_columns_indicies() {
         let board = Board::new();
-        let indices = board.indicies;
+        let indices = board.indicies();
         assert!(indices.len() == board.rows * board.columns);
     }
 
@@ -85,6 +91,17 @@ mod test {
             Some(marker) => assert_eq!(marker, Marker::X),
             None         => panic!(),
         }
+    }
+
+    #[test]
+    fn it_should_know_when_there_are_no_moves_left() {
+        let mut board = Board::new();
+        {
+            for index in board.indicies() {
+                board.set_marker(&index, Marker::X);
+            }
+        }
+        assert!(!board.has_moves());
     }
 }
 
