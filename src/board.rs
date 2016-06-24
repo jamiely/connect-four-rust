@@ -74,6 +74,25 @@ impl Board {
             false
         }
     }
+
+    fn drop_into_column(&mut self, column: usize, marker: Marker) -> Option<Index> {
+        match self.first_empty_row_in_column(column) {
+            Some(index) => {
+                self.set_marker(&index, marker);
+                Some(index)
+            }
+            None => None
+        }
+    }
+
+    fn first_empty_row_in_column(&self, column: usize) -> Option<Index> {
+        (0..self.rows).map(|row| (column, row)).find(|index| {
+            match self.get_marker(&index) {
+                Some(m) => m == Marker::Empty,
+                None => false
+            }
+        })
+    }
 }
 
 #[cfg(test)]
@@ -90,8 +109,8 @@ mod test {
     #[test]
     fn it_should_have_rows_times_columns_indicies() {
         let board = Board::new();
-        let indices = board.indicies();
-        assert!(indices.len() == board.rows * board.columns);
+        let indicies = board.indicies();
+        assert!(indicies.len() == board.rows * board.columns);
     }
 
     #[test]
@@ -137,6 +156,44 @@ mod test {
         assert!(!board.marker_is_at(Marker::X, &(1,1)));
         board.set_marker(&(1,1), Marker::X);
         assert!(board.marker_is_at(Marker::X, &(1,1)));
+    }
+
+    #[test]
+    fn it_finds_the_first_empty_row_in_a_column() {
+        let mut board = Board::new();
+        match board.first_empty_row_in_column(0) {
+            Some(index) => assert_eq!(index, (0,0)),
+            None => panic!()
+        };
+
+        board.set_marker(&(0,0), Marker::X);
+
+        match board.first_empty_row_in_column(0) {
+            Some(index) => assert_eq!(index, (0,1)),
+            None => panic!()
+        };
+
+        board.set_marker(&(0,1), Marker::X);
+
+        match board.first_empty_row_in_column(0) {
+            Some(index) => assert_eq!(index, (0,2)),
+            None => panic!()
+        };
+    }
+
+    #[test]
+    fn it_allows_dropping_into_a_column() {
+        let mut board = Board::new();
+        assert!(board.drop_into_column(0, Marker::X).is_some());
+        assert!(board.drop_into_column(0, Marker::X).is_some());
+        assert!(board.drop_into_column(0, Marker::X).is_some());
+        assert!(board.drop_into_column(0, Marker::X).is_some());
+        assert!(board.drop_into_column(0, Marker::X).is_some());
+        assert!(board.drop_into_column(0, Marker::X).is_some());
+        match board.first_empty_row_in_column(0) {
+            Some(index) => panic!(),
+            None => assert!(true)
+        };
     }
 }
 
