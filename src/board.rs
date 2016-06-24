@@ -1,19 +1,37 @@
+use std::collections::HashMap;
+
 pub struct Board {
     rows: usize,
-    columns: usize
+    columns: usize,
+    indicies: Vec<(usize, usize)>,
+    markers: HashMap<(usize, usize), usize>
 }
 
 impl Board {
     pub fn new() -> Board {
+        let rows = 6;
+        let columns = 7;
+
+        let indicies = (0..columns).flat_map(|column: usize| {
+            (0..rows).map(move |row: usize| (column, row))
+        }).collect::<Vec<(usize, usize)>>();
+
+        let mut markers = HashMap::new();
+        for index in indicies.clone() {
+            markers.insert(index, 0 as usize);
+        }
+
         Board {
-            rows: 6,
-            columns: 7
+            rows: rows,
+            columns: columns,
+            indicies: indicies,
+            markers: markers
         }
     }
-    pub fn indices(&self) -> Vec<(usize, usize)> {
-        (0..self.columns).flat_map(|column: usize| {
-            (0..self.rows).map(move |row: usize| (column, row))
-        }).collect::<Vec<(usize, usize)>>()
+
+    pub fn is_empty(&self) -> bool {
+        let zero: usize = 0;
+        self.markers.values().all(|v| zero.eq(v))
     }
 }
 
@@ -31,8 +49,14 @@ mod test {
     #[test]
     fn it_should_have_rows_times_columns_indicies() {
         let board = Board::new();
-        let indices = board.indices();
+        let indices = board.indicies;
         assert!(indices.len() == board.rows * board.columns);
+    }
+
+    #[test]
+    fn it_should_be_empty() {
+        let board = Board::new();
+        assert!(board.is_empty());
     }
 }
 
