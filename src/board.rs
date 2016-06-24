@@ -56,6 +56,24 @@ impl Board {
     pub fn has_moves(&self) -> bool {
         self.markers.values().any(|v| Marker::Empty.eq(v))
     }
+
+    pub fn index_is_valid(&self, index: &Index) -> bool {
+        let (col, row) = *index;
+        0 <= row && row < self.rows && 0 <= col && col < self.columns
+    }
+
+    // Returns true if the passed marker is at the passed index
+    pub fn marker_is_at(&self, marker: Marker, index: &Index) -> bool {
+        if(self.index_is_valid(index)) {
+            match self.get_marker(index) {
+                Some(m) => m == marker,
+                None => false,
+            }
+        }
+        else {
+            false
+        }
+    }
 }
 
 #[cfg(test)]
@@ -102,6 +120,23 @@ mod test {
             }
         }
         assert!(!board.has_moves());
+    }
+
+    #[test]
+    fn it_checks_for_valid_indicies() {
+        let board = Board::new();
+        assert!(board.index_is_valid(&(1,1)));
+        assert!(!board.index_is_valid(&(1,10)));
+        assert!(!board.index_is_valid(&(10,1)));
+    }
+
+    #[test]
+    fn can_check_for_marker_at() {
+        let mut board = Board::new();
+
+        assert!(!board.marker_is_at(Marker::X, &(1,1)));
+        board.set_marker(&(1,1), Marker::X);
+        assert!(board.marker_is_at(Marker::X, &(1,1)));
     }
 }
 
