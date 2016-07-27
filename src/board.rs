@@ -59,12 +59,12 @@ impl Board {
 
     pub fn index_is_valid(&self, index: &Index) -> bool {
         let (col, row) = *index;
-        0 <= row && row < self.rows && 0 <= col && col < self.columns
+        row < self.rows && col < self.columns
     }
 
     // Returns true if the passed marker is at the passed index
     pub fn marker_is_at(&self, marker: Marker, index: &Index) -> bool {
-        if(self.index_is_valid(index)) {
+        if self.index_is_valid(index) {
             match self.get_marker(index) {
                 Some(m) => m == marker,
                 None => false,
@@ -75,7 +75,7 @@ impl Board {
         }
     }
 
-    fn drop_into_column(&mut self, column: usize, marker: Marker) -> Option<Index> {
+    pub fn drop_into_column(&mut self, column: usize, marker: Marker) -> Option<Index> {
         match self.first_empty_row_in_column(column) {
             Some(index) => {
                 self.set_marker(&index, marker);
