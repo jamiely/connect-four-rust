@@ -35,5 +35,47 @@ impl Game {
 #[cfg(test)]
 mod test {
     use super::*;
+    use board::*;
 
+    #[test]
+    fn starts_with_x() {
+        let game = Game::new();
+        assert!(game.current_marker == Marker::X)
+    }
+
+    fn assert_index(opt_index: Option<Index>, index: Index) -> () {
+        match opt_index {
+            Some(i) if i == index => assert!(true),
+            Some(_) => assert!(false),
+            None => assert!(false),
+        }
+    }
+
+    fn assert_none(opt_index: Option<Index>) -> () {
+        match opt_index {
+            Some(_) => assert!(false),
+            None => assert!(true),
+        }
+    }
+
+    #[test]
+    fn current_marker_changes_when_move_is_made() {
+        let mut game = Game::new();
+        assert!(game.current_marker == Marker::X);
+        game.make_move(0);
+        assert!(game.current_marker == Marker::O);
+    }
+
+    #[test]
+    fn moves_increment_indices() {
+        let mut game = Game::new();
+        assert_index(game.make_move(0), (0, 0));
+        assert_index(game.make_move(0), (0, 1));
+        assert_index(game.make_move(0), (0, 2));
+        assert_index(game.make_move(0), (0, 3));
+        assert_index(game.make_move(0), (0, 4));
+        assert_index(game.make_move(0), (0, 5));
+        assert_none(game.make_move(0));
+    }
 }
+
