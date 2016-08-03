@@ -10,6 +10,18 @@ pub enum Marker {
     O,
 }
 
+impl fmt::Display for Marker {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let result = match *self {
+            Marker::X => "X",
+            Marker::O => "Y",
+            _ => "_"
+        };
+
+        write!(f, "{}", result)
+    }
+}
+
 pub struct Board {
     pub rows: usize,
     pub columns: usize,
@@ -20,13 +32,10 @@ impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let result: String = (0..self.rows).rev().map(|row: usize| {
             (0..self.columns).map(move |column: usize| {
-                let m: Option<Marker> = self.get_marker(&(column, row));
-                let result: &str = match m {
-                    Some(Marker::X) => "X",
-                    Some(Marker::O) => "O",
-                    _ => "_",
-                };
-                result.to_owned()
+                match self.get_marker(&(column, row)) {
+                    Some(marker) => format!("{}", marker),
+                    None => "_".to_owned(),
+                }.to_owned()
             }).collect::<Vec<String>>().join("").to_owned()
         }).collect::<Vec<String>>().join("\n");
         write!(f, "{}", result)
