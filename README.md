@@ -6,7 +6,7 @@
 
 # Running
 
-Doesn't run yet.
+`cargo run`
 
 # Tests
 

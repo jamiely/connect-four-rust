@@ -1,19 +1,19 @@
 use board::*;
 
 pub struct Game {
-    board: Board,
-    current_marker: Marker
+    pub board: Board,
+    pub current_marker: Marker
 }
 
 impl Game {
-    fn new() -> Game {
+    pub fn new() -> Game {
         Game {
             board: Board::new(),
             current_marker: Marker::X
         }
     }
 
-    fn toggle_marker(&mut self) -> Marker {
+    pub fn toggle_marker(&mut self) -> Marker {
         self.current_marker = if self.current_marker == Marker::X {
             Marker::O
         } else {

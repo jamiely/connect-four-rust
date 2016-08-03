@@ -1,6 +1,14 @@
 [package]
-name = "connect-four"
+name = "connect_four"
 version = "0.1.0"
 authors = ["Jamie Ly <jamie.ly@gmail.com>"]
+
+[lib]
+name = "connect_four"
+path = "src/lib.rs"
+
+[[bin]]
+name = "connect_four"
+path = "src/main.rs"
 
 [dependencies]

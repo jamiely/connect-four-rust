@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt;
 
 pub type Index = (usize, usize);
 
@@ -10,9 +11,26 @@ pub enum Marker {
 }
 
 pub struct Board {
-    rows: usize,
-    columns: usize,
+    pub rows: usize,
+    pub columns: usize,
     markers: HashMap<Index, Marker>
+}
+
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let result: String = (0..self.rows).rev().map(|row: usize| {
+            (0..self.columns).map(move |column: usize| {
+                let m: Option<Marker> = self.get_marker(&(column, row));
+                let result: &str = match m {
+                    Some(Marker::X) => "X",
+                    Some(Marker::O) => "O",
+                    _ => "_",
+                };
+                result.to_owned()
+            }).collect::<Vec<String>>().join("").to_owned()
+        }).collect::<Vec<String>>().join("\n");
+        write!(f, "{}", result)
+    }
 }
 
 impl Board {
