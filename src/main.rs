@@ -29,6 +29,10 @@ fn main() {
             },
         }
 
+        if ! game.has_moves() {
+            println!("\n{}\nThere are no moves left", game.board);
+            break;
+        }
 
     }
 }

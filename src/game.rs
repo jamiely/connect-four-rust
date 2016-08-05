@@ -13,6 +13,20 @@ impl Game {
         }
     }
 
+    fn get_marker(&self, index: &Index) -> Option<Marker> {
+        self.board.get_marker(index)
+    }
+
+    pub fn has_moves(&self) -> bool {
+        self.board.indicies().iter().any(|index: &Index| {
+            let opt_marker = self.get_marker(index);
+            match opt_marker {
+                Some(marker) => marker == Marker::Empty,
+                None => false
+            }
+        })
+    }
+
     pub fn toggle_marker(&mut self) -> Marker {
         self.current_marker = if self.current_marker == Marker::X {
             Marker::O
@@ -76,6 +90,18 @@ mod test {
         assert_index(game.make_move(0), (0, 4));
         assert_index(game.make_move(0), (0, 5));
         assert_none(game.make_move(0));
+    }
+
+    #[test]
+    fn has_moves() {
+        let mut game = Game::new();
+        assert!(game.has_moves());
+        game.board.indicies().iter().fold((), |_, index: &Index| {
+            let (col, _) = index.to_owned();
+            assert!(game.has_moves());
+            game.make_move(col);
+        });
+        assert!(!game.has_moves());
     }
 }
 
