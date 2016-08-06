@@ -218,7 +218,7 @@ mod test {
         assert!(board.drop_into_column(0, Marker::X).is_some());
         assert!(board.drop_into_column(0, Marker::X).is_some());
         match board.first_empty_row_in_column(0) {
-            Some(index) => panic!(),
+            Some(_) => panic!(),
             None => assert!(true)
         };
     }

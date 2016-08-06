@@ -14,6 +14,8 @@ fn main() {
         io::stdin().read_line(&mut buffer)
             .ok().expect("Failed to read line");
 
+
+        let current_marker = game.current_marker;
         let line = buffer.trim();
 
         match line {
@@ -21,7 +23,12 @@ fn main() {
             _ => {
                 match line.parse() {
                     Ok(input) => match game.make_move(input) {
-                        Some(_) => println!("{}", input),
+                        Some(index) => {
+                            if game.is_win(index) {
+                                println!("{}\n{} has won!", game.board, current_marker);
+                                break;
+                            }
+                        },
                         None    => println!("Cannot make that move"),
                     },
                     Err(_) => println!("Invalid selection"),

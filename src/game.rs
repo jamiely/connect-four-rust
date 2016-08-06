@@ -27,6 +27,57 @@ impl Game {
         })
     }
 
+    fn directions(&self) -> Vec<(i8, i8)> {
+        vec!((0, 1), (1, 0), (0, -1), (-1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1))
+    }
+
+    /*
+     * Determine if someone has won at the passed index
+     */
+    pub fn is_win(&self, index: Index) -> bool {
+        match self.get_marker(&index) {
+            Some(marker) => self.directions().iter().any(|dir| {
+                                self.is_win_in_dir(marker, index, dir, 1)
+                            }),
+            None => false
+        }
+    }
+
+    fn is_win_in_dir(&self, marker: Marker, index: Index, direction: &(i8, i8), count: i8) -> bool {
+        if count >= 4 {
+            let (c, r) = *direction;
+            return true;
+        }
+        if marker == Marker::Empty {
+            return false;
+        }
+
+        match self.index_in_dir(index, direction) {
+            Some(next_index) =>
+                match self.get_marker(&next_index) {
+                    Some(next_marker) if marker == next_marker =>
+                        self.is_win_in_dir(marker, next_index, direction, count + 1),
+                    Some(_) => false,
+                    None => false
+                },
+            None => false
+        }
+
+    }
+
+    fn index_in_dir(&self, index: Index, direction: &(i8, i8)) -> Option<Index> {
+        let (col, row) = index;
+        let (dc, dr) = *direction;
+        let (nc, nr) = (col as i8 + dc, row as i8 + dr);
+        // TODO: fix ugly casts here
+        if 0 <= nc && nc < self.board.columns as i8 && 0 <= nr && nr < self.board.rows as i8 {
+            Some((nc as usize, nr as usize))
+        }
+        else {
+            None
+        }
+    }
+
     pub fn toggle_marker(&mut self) -> Marker {
         self.current_marker = if self.current_marker == Marker::X {
             Marker::O
@@ -102,6 +153,62 @@ mod test {
             game.make_move(col);
         });
         assert!(!game.has_moves());
+    }
+
+    #[test]
+    fn is_win_in_dir() {
+        let mut game = Game::new();
+
+        fn assert_not_win(g: &Game, move_result: Option<Index>) {
+            assert!(!g.is_win(move_result.expect("problem")));
+        }
+
+        let mut result = game.make_move(0);
+        assert!(!game.is_win(result.expect("problem")));
+        result = game.make_move(0);
+        assert!(!game.is_win(result.expect("problem")));
+        result = game.make_move(1);
+        assert!(!game.is_win(result.expect("problem")));
+        result = game.make_move(1);
+        assert!(!game.is_win(result.expect("problem")));
+        result = game.make_move(2);
+        assert!(!game.is_win(result.expect("problem")));
+        result = game.make_move(2);
+        assert!(!game.is_win(result.expect("problem")));
+        result = game.make_move(3);
+        assert!(game.is_win(result.expect("problem")));
+    }
+
+    #[test]
+    fn vertical_wins() {
+        let mut game = Game::new();
+        game.make_move(0);
+        game.make_move(1);
+        game.make_move(0);
+        game.make_move(1);
+        game.make_move(0);
+        let mut result = game.make_move(1);
+        assert!(!game.is_win(result.expect("problem")));
+        result = game.make_move(0);
+        assert!(game.is_win(result.expect("problem")));
+    }
+
+    #[test]
+    fn diagonal_win() {
+        let mut game = Game::new();
+        game.make_move(0);
+        game.make_move(1);
+        game.make_move(1);
+        game.make_move(2);
+        game.make_move(0);
+        game.make_move(2);
+        game.make_move(2);
+        game.make_move(3);
+        game.make_move(3);
+        let mut result = game.make_move(3);
+        assert!(!game.is_win(result.expect("problem")));
+        result = game.make_move(3);
+        assert!(game.is_win(result.expect("problem")));
     }
 }
 
