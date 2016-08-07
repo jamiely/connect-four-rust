@@ -11,29 +11,23 @@ fn main() {
                  game.current_marker,
                  game.board.columns,
                  game.board);
+
         io::stdin().read_line(&mut buffer)
             .ok().expect("Failed to read line");
-
 
         let current_marker = game.current_marker;
         let line = buffer.trim();
 
         match line {
             "quit" | "q" => return,
-            _ => {
-                match line.parse() {
-                    Ok(input) => match game.make_move(input) {
-                        Some(index) => {
-                            if game.is_win(index) {
-                                println!("{}\n{} has won!", game.board, current_marker);
-                                break;
-                            }
-                        },
-                        None    => println!("Cannot make that move"),
-                    },
-                    Err(_) => println!("Invalid selection"),
-                }
-            },
+            _ => match line.parse().ok().and_then(|input| game.make_move(input)) {
+                Some(index) if game.is_win(index) => {
+                    println!("{}\n{} has won!", game.board, current_marker);
+                    break;
+                },
+                Some(_) => {},
+                None    => println!("Cannot make that move"),
+            }
         }
 
         if ! game.has_moves() {

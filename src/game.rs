@@ -36,6 +36,7 @@ impl Game {
      */
     pub fn is_win(&self, index: Index) -> bool {
         match self.get_marker(&index) {
+            Some(Marker::Empty) => false,
             Some(marker) => self.directions().iter().any(|dir| {
                                 self.is_win_in_dir(marker, index, dir, 1)
                             }),
@@ -44,30 +45,20 @@ impl Game {
     }
 
     fn is_win_in_dir(&self, marker: Marker, index: Index, direction: &(i8, i8), count: i8) -> bool {
-        if count >= 4 {
-            let (c, r) = *direction;
-            return true;
-        }
-        if marker == Marker::Empty {
-            return false;
-        }
+        if count >= 4 { return true; }
+        if marker == Marker::Empty { return false; }
 
-        match self.index_in_dir(index, direction) {
-            Some(next_index) =>
-                match self.get_marker(&next_index) {
-                    Some(next_marker) if marker == next_marker =>
-                        self.is_win_in_dir(marker, next_index, direction, count + 1),
-                    Some(_) => false,
-                    None => false
-                },
-            None => false
-        }
-
+        self.index_in_dir(index, direction).and_then(|next_index| {
+            self.get_marker(&next_index).map(|m| (next_index, m))
+        }).map_or(false, |pair| {
+            let (next_index, next_marker) = pair;
+            marker == next_marker &&
+                self.is_win_in_dir(marker, next_index, direction, count + 1)
+        })
     }
 
     fn index_in_dir(&self, index: Index, direction: &(i8, i8)) -> Option<Index> {
-        let (col, row) = index;
-        let (dc, dr) = *direction;
+        let ((col, row), (dc, dr)) = (index, *direction);
         let (nc, nr) = (col as i8 + dc, row as i8 + dr);
         // TODO: fix ugly casts here
         if 0 <= nc && nc < self.board.columns as i8 && 0 <= nr && nr < self.board.rows as i8 {
